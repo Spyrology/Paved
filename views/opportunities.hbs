@@ -13,7 +13,7 @@ No HR departments to block your path, no silly job descriptions and requirements
 	</h3>
 	<table class="opportunities-table">
 		<tbody>
-			<tr> 
+			<tr>
 				<td class="opportunities name">
 					<a href="/focused">Marketing</a>
 				</td>
@@ -30,30 +30,24 @@ No HR departments to block your path, no silly job descriptions and requirements
 		</tbody>
 	</table>
 </div>
-{{#each opportunities}}
+{{#companies}}
 <div class="company-container">
-	<h3>{{company}}
-	</h3>
+	<h3>{{name}}</h3>
+	{{companyId}}
+	{{#opportunities}}
 	<table class="opportunities-table">
 		<tbody>
-			<tr> 
+			<tr>
 				<td class="opportunities name">
-					<a href="/focused">{{position}}</a>
+					<a href="/opportunities/{{companyId}}/evaluation/{{id}}">{{position}}</a>
 				</td>
-				<td class="opportunities timeframe">{{status}}</td>
-			</tr>
-			<tr>
-				<td class="opportunities name">{{position}}</td>
-				<td class="opportunities timeframe">{{status}}</td>
-			</tr>
-			<tr>
-				<td class="opportunities name">{{position}}</td>
 				<td class="opportunities timeframe">{{status}}</td>
 			</tr>
 		</tbody>
 	</table>
+	{{/opportunities}}
 </div>
-{{/each}}
+{{/companies}}
 <div class="company-container">
 	<h3>THINKFUL
 	</h3>

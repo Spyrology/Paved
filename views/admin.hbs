@@ -1,4 +1,62 @@
-<div class="form">
+<form>
+<div class="app-root">
+  <select name="company" id="">
+    <option>-- Select One --</option>
+    <option value="add"> -- Add a company --</option>
+    {{#each companies}}
+    <option value="{{_id}}">{{name}}</option> 
+    {{/each}}
+  </select>
+  <div class="hideIfNotNew">
+    <label for="">
+      Company Name:
+      <input type="text" name="name" />
+    </label>
+  </div>
+  <div>
+    <label for="">
+      Position:
+      <input type="text" name="position" required/>
+    </label>
+  </div>
+  <div>
+    <label for="">
+      Status:
+      <input type="text" name="status" required/>
+    </label>
+  </div>
+  <div>
+    <label for="">
+      Requirements:
+      <input type="text" name="requirements" required/>
+    </label>
+  </div>
+  <div>
+    <label for="">
+      Time Estimate:
+      <input type="text" name="timeestimate" required/>
+    </label>
+  </div>
+  <div>
+    <label for="">
+      Price:
+      <input type="number" name="price" required/>
+    </label>
+  </div>
+  <div>
+    <label for="">
+      Description:
+      <input type="text" name="description" required/>
+    </label>
+  </div>
+  <button>Submit</button>
+</div>
+</form>
+
+<script src="/javascripts/admin.js"></script>
+
+
+{{!-- <div class="form">
   <div class="form-header">
   </div>
   <div class="form-body">
@@ -7,7 +65,7 @@
 
   <div class="first-row">
     <label>
-      <input type="text" name="company" placeholder="Company">
+      <input type="text" name="name" placeholder="Company">
     </label>
   </div>
 
@@ -44,4 +102,4 @@
   <button type="submit">Get Paved</button>
   </form>
   </div>
-</div>
+</div> --}}
