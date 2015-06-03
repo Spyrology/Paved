@@ -9,6 +9,7 @@ var stripe = require('stripe')("sk_test_r6CoQNy1HzO4cfqEDqS6D4I8");
 var AWS = require('aws-sdk');
 var s3 = new AWS.S3();
 var path = require('path');
+var amazon = require('../lib/amazon');
 
 /* GET home page. */
 
@@ -24,9 +25,6 @@ router
 	})
 	.get('/opportunities', function (req, res) {
 		companies.find(req, function (err, opps) {
-			// if (req.get('content-type') === 'application/json') {
-			// 	return res.json(opps);
-			// }
 			if(err) return console.log(err);
 			opps.forEach(function(company) {
 				company.opportunities.forEach(function(opp, i, list) {
@@ -62,11 +60,11 @@ router
 		  }
 		});
 	})
-	.get('/opportunities/:companyId/evaluation/:id/upload', function (req, res) {
-		res.render('index', { stylesheet: 'index' });
-	})
-	.get('/opportunities/:companyId/evaluation/:id/upload', function (req, res) {
-		companies.findEvalFile(req, res, function(filename) {
+	.get('/opportunities/:id', function (req, res) {
+		return console.log(req);
+		var opportunity = req.params.id;
+		var filename = opportunity.file;
+		console.log(filename);
 			var params = {Bucket: 'paved-test', Key: filename};
 			var file = fs.createWriteStream(path.join(__dirname, filename));
 			s3.getObject(params)
@@ -79,7 +77,12 @@ router
 				});
 			})
 			.send();
+	})
+	.post('/opportunities/upload', function (req, res) {
+		amazon.upload(req, function (err, data) {
+			if (err) return console.error(err);
 		});
+		res.render('index', { stylesheet: 'index' });
 	})
 	.get('/admin', isLoggedIn, function (req, res) {
 		companies.find(req, function (err, opps) {
@@ -87,7 +90,8 @@ router
 			res.render('admin', { stylesheet: 'admin', companies: opps });
 		});
 	})
-	.post('/admin', function(req, res){
+	.post('/admin', function (req, res) {
+		console.log(req.files);
 		if(req.body.method === 'post') companies.create(req, res);
 		else companies.update(req, res);
 	})

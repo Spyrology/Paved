@@ -99,12 +99,12 @@ exports.find = function(req, done) {
 };
 
 exports.show = function(req, res) {
-	var query = {
+	/*var query = {
 		'file': ''
-	};
+	};*/
 	Company.findById(req.params.companyId, function(err, company) {
 		if (err) throw err;
-		evaluation = company.opportunities.id(req.params.id);
+		var evaluation = company.opportunities.id(req.params.id);
 		console.log(evaluation);
 		res.render('evaluation', {
 			stylesheet: 'evaluation',
@@ -112,21 +112,11 @@ exports.show = function(req, res) {
 			opportunity: evaluation
 		});
 	});
-	Company.find(evaluation, query, function(err, filename) {
+	/*Company.find(evaluation, query, function(err, filename) {
 		if (err) throw err;
 		console.log(filename);
-	});
+	});*/
 };
-
-/*exports.findEvalFile = function (req, res) {
-		var query = { 'opportunities.file': '' };
-		var filename = query.findOne(Company, function (err, doc) {
-			if (err) throw err;
-			done(doc);
-			console.log(filename);
-	});
-};
-*/
 
 exports.findEvalFile = function(req, res, done) {
 	var companyId = req.params.companyId;
@@ -140,13 +130,3 @@ exports.findEvalFile = function(req, res, done) {
 		done(filename);
 	});
 };
-
-/*exports.findEvalFile = function (req, res) {
-	Company.findById(req.params.companyId, function (err, company) {
-		if (err) throw err;
-		var query = { 'opportunities.file': '' };
-		var filename = Company.find(query);
-	});
-	done(err, filename);
-	console.log(filename);
-};*/

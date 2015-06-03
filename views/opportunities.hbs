@@ -12,7 +12,7 @@ No HR departments to block your path, no silly job descriptions and requirements
 	<div class="company-container">
 		<h3>{{name}}
 		</h3>
-		{{companyId}}
+		<!-- {{companyId}} -->
 		{{#opportunities}}
 		<div class='wrapper'>
 		<table class="opportunities-table">
@@ -42,13 +42,11 @@ No HR departments to block your path, no silly job descriptions and requirements
 							<a href="/opportunities/{{companyId}}/evaluation/{{id}}">GET EVALUATION
 							</a>
 						</button>
-						<label>
-						<button id="user_upload" class="user-actions">
-							<a href="/opportunities/{{companyId}}/evaluation/{{id}}/upload">UPLOAD EVALUATION
-							</a>
+						<form action="/opportunities/upload" method="post" enctype="multipart/form-data">
+						<button id="user_upload" class="user-actions">UPLOAD EVALUATION
 						</button>
-						</label>
-						<input type="file" id="hide_upload" class="hidden_upload">
+						<input type="file" id="file" name="file">
+						</form>
 					</td>
 				</tr>
 			</tbody>
