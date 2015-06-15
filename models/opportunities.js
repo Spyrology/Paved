@@ -49,7 +49,7 @@ var getOpportunity = function(req) {
 		timeestimate: req.body.timeestimate,
 		price: req.body.price,
 		description: req.body.description,
-		file: req.body.file
+		file: req.files.file.originalname
 	};
 	return opp;
 };
@@ -73,6 +73,7 @@ exports.create = function(req, res) {
 exports.update = function(req, res) {
   console.log('update');
 	amazon.upload(req, function(err, data) {
+		console.log("waaahoooooo");
 		if (err) return console.error(err);
 		Company.findById(req.body.company, function(err, company) {
 			if (err) return console.log(err);
@@ -118,15 +119,12 @@ exports.show = function(req, res) {
 	});*/
 };
 
-exports.findEvalFile = function(req, res, done) {
+exports.findOpportunity = function (req, done) {
 	var companyId = req.params.companyId;
 	var evalId = req.params.id;
-	console.log(evalId);
 	Company.findById(companyId, function(err, company) {
 		if (err) throw err;
 		var opportunity = company.opportunities.id(evalId);
-		var filename = opportunity.file;
-		console.log(filename);
-		done(filename);
+		done(opportunity);
 	});
 };

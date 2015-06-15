@@ -35,54 +35,58 @@ router
 		});
 	})
 	.get('/opportunities/:companyId/evaluation/:id', isLoggedIn, function (req, res) {
+		console.log(req);
 		res.render('payment-form', { stylesheet: 'payment-form' });
 	})
 	.post('/opportunities/:companyId/evaluation/:id', function (req, res, next) {
 		//Obtain StripeToken
 		var stripeToken = req.body.stripeToken;
 
-		var charge = {
-    amount: 1000,
-    currency: 'USD',
-    source: stripeToken,
-    description: "Example charge"
-  	};
+		companies.findOpportunity(req, function(opportunity) {
 
-  	console.log(stripeToken);
+			var charge = {
+		    amount: opportunity.price * 100,
+		    currency: 'USD',
+		    source: stripeToken,
+		    description: "Example charge"
+	  	};
 
-		stripe.charges.create(charge, function(err, charge) {
-		  if (err && err.type === 'StripeCardError') {
-		    // The card has been declined
-		    return next (err);
-		  }
-		  else {
-		  	companies.show(req, res);
-		  }
+	  	console.log(stripeToken);
+
+			stripe.charges.create(charge, function (err, charge) {
+			  if (err && err.type === 'StripeCardError') {
+			    // The card has been declined
+			    return next (err);
+			  }
+			  else {
+			  	companies.show(req, res);
+			  }
+			});
+
 		});
 	})
-	.get('/opportunities/:id', function (req, res) {
-		return console.log(req);
-		var opportunity = req.params.id;
-		var filename = opportunity.file;
-		console.log(filename);
+	.get('/opportunities/:companyId/download/:id', isLoggedIn, function (req, res) {
+		companies.findOpportunity(req, function(opportunity) {
+			var filename = opportunity.file;
 			var params = {Bucket: 'paved-test', Key: filename};
 			var file = fs.createWriteStream(path.join(__dirname, filename));
-			s3.getObject(params)
-			.on('httpData', function(chunk) { file.write(chunk); })
-			.on('httpDone', function(data) {
-				file.end(function (err, result) {
-					res.setHeader('content-type', data.httpResponse.headers['content-type']);
-					fs.createReadStream(file.path).pipe(res);
-						fs.unlinkSync(file.path);
-				});
-			})
-			.send();
+				s3.getObject(params)
+				.on('httpData', function(chunk) { file.write(chunk); })
+				.on('httpDone', function(data) {
+					file.end(function (err, result) {
+						res.attachment(file.path);
+						fs.createReadStream(file.path).pipe(res);
+							fs.unlinkSync(file.path);
+					});
+				})
+				.send();
+		});
 	})
 	.post('/opportunities/upload', function (req, res) {
 		amazon.upload(req, function (err, data) {
 			if (err) return console.error(err);
+			res.redirect('/opportunities');
 		});
-		res.render('index', { stylesheet: 'index' });
 	})
 	.get('/admin', isLoggedIn, function (req, res) {
 		companies.find(req, function (err, opps) {
@@ -99,7 +103,7 @@ router
 		res.render('sign-up', {layout: false});
 	})
 	// process the signup form
-  .post('/sign-up', function(req, res, next) {
+  .post('/sign-up', function (req, res, next) {
 	  passport.authenticate('local-signup', function(err, user, info) {
 	    //This is the default destination upon successful login
 	    var redirectUrl = '/';
@@ -123,7 +127,7 @@ router
   .get('/log-in', function (req, res) {
 		res.render('log-in', {layout: false});
 	})
-  .post('/log-in', function(req, res, next) {
+  .post('/log-in', function (req, res, next) {
 	  passport.authenticate('local-login', function(err, user, info) {
 	    //This is the default destination upon successful login
 	    var redirectUrl = '/';
@@ -138,7 +142,7 @@ router
 	    	req.session.redirectUrl = null;
 	    }
 
-	    req.logIn(user, function(err){
+	    req.logIn(user, function (err) {
 	    	if (err) { return next(err); }
 	    });
 	    res.redirect(redirectUrl);
