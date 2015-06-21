@@ -10,6 +10,7 @@ var AWS = require('aws-sdk');
 var s3 = new AWS.S3();
 var path = require('path');
 var amazon = require('../lib/amazon');
+var users = require('../models/users');
 
 /* GET home page. */
 
@@ -35,23 +36,49 @@ router
 		});
 	})
 	.get('/opportunities/:companyId/evaluation/:id', isLoggedIn, function (req, res) {
-		console.log(req);
 		res.render('payment-form', { stylesheet: 'payment-form' });
 	})
 	.post('/opportunities/:companyId/evaluation/:id', function (req, res, next) {
 		//Obtain StripeToken
 		var stripeToken = req.body.stripeToken;
 
-		companies.findOpportunity(req, function(opportunity) {
+		companies.getOpportunity(req, function (opportunity) {
 
-			var charge = {
+			var userEmail = req.user.local.email;
+			var evalId = opportunity.id;
+
+			stripe.customers.create({
+			  source: stripeToken,
+			  description: userEmail
+			}).then(function (customer) {
+			  return stripe.charges.create({ 
+			    amount: opportunity.price * 100, // amount in cents
+			    currency: "usd",
+			    customer: customer.id,
+			    metadata: {'evalId': evalId}
+			  }, function (err, charge) {
+				  	if (err && err.type === 'StripeCardError') {
+					    // The card has been declined
+					    return next (err);
+					  }
+					  else {
+					  	users.saveChargeToUser(req);
+					  	console.log(req.user);
+					  	companies.show(req, res);
+					  }
+				});
+			});/*then(function(charge) {
+			  saveStripeCustomerId(user, charge.customer);
+			});*/
+
+			//companies.show(req, res);
+
+			/*var charge = {
 		    amount: opportunity.price * 100,
 		    currency: 'USD',
 		    source: stripeToken,
 		    description: "Example charge"
 	  	};
-
-	  	console.log(stripeToken);
 
 			stripe.charges.create(charge, function (err, charge) {
 			  if (err && err.type === 'StripeCardError') {
@@ -62,11 +89,11 @@ router
 			  	companies.show(req, res);
 			  }
 			});
-
+*/
 		});
 	})
 	.get('/opportunities/:companyId/download/:id', isLoggedIn, function (req, res) {
-		companies.findOpportunity(req, function(opportunity) {
+		companies.getOpportunity(req, function(opportunity) {
 			var filename = opportunity.file;
 			var params = {Bucket: 'paved-test', Key: filename};
 			var file = fs.createWriteStream(path.join(__dirname, filename));

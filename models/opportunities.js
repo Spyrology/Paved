@@ -41,7 +41,7 @@ var companySchema = mongoose.Schema({
 
 var Company = mongoose.model('Company', companySchema);
 
-var getOpportunity = function(req) {
+var buildOpportunity = function(req) {
 	var opp = {
 		position: req.body.position,
 		status: req.body.status,
@@ -56,12 +56,12 @@ var getOpportunity = function(req) {
 
 exports.create = function(req, res) {
   console.log('create');
-	amazon.upload(req, function(err, data) {
+	amazon.upload(req, function (err, data) {
 		var company = new Company({
 			name: req.body.name,
-			opportunities: [getOpportunity(req)]
+			opportunities: [buildOpportunity(req)]
 		});
-		company.save(function(err, item) {
+		company.save(function (err, item) {
 			if (err) return console.error(err);
 			res.render('opportunities', {
 				stylesheet: 'opportunities'
@@ -72,14 +72,13 @@ exports.create = function(req, res) {
 
 exports.update = function(req, res) {
   console.log('update');
-	amazon.upload(req, function(err, data) {
-		console.log("waaahoooooo");
+	amazon.upload(req, function (err, data) {
 		if (err) return console.error(err);
-		Company.findById(req.body.company, function(err, company) {
+		Company.findById(req.body.company, function (err, company) {
 			if (err) return console.log(err);
-			company.opportunities.push(getOpportunity(req));
-			console.log(getOpportunity(req));
-			company.save(function(err) {
+			company.opportunities.push(buildOpportunity(req));
+			console.log(buildOpportunity(req));
+			company.save(function (err) {
 				if (err) return console.log(err);
         res.render('opportunities', {
   				stylesheet: 'opportunities'
@@ -90,7 +89,7 @@ exports.update = function(req, res) {
 };
 
 exports.find = function(req, done) {
-	Company.find(function(err, opps) {
+	Company.find(function (err, opps) {
 		if (typeof done === 'function') {
 			done(err, opps);
 		} else {
@@ -100,10 +99,7 @@ exports.find = function(req, done) {
 };
 
 exports.show = function(req, res) {
-	/*var query = {
-		'file': ''
-	};*/
-	Company.findById(req.params.companyId, function(err, company) {
+	Company.findById(req.params.companyId, function (err, company) {
 		if (err) throw err;
 		var evaluation = company.opportunities.id(req.params.id);
 		console.log(evaluation);
@@ -113,16 +109,12 @@ exports.show = function(req, res) {
 			opportunity: evaluation
 		});
 	});
-	/*Company.find(evaluation, query, function(err, filename) {
-		if (err) throw err;
-		console.log(filename);
-	});*/
 };
 
-exports.findOpportunity = function (req, done) {
+exports.getOpportunity = function(req, done) {
 	var companyId = req.params.companyId;
 	var evalId = req.params.id;
-	Company.findById(companyId, function(err, company) {
+	Company.findById(companyId, function (err, company) {
 		if (err) throw err;
 		var opportunity = company.opportunities.id(evalId);
 		done(opportunity);
