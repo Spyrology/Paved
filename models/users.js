@@ -11,9 +11,8 @@ var userSchema = mongoose.Schema({
   	customerId	: String,
   	charges			: [] 
 	}
-});
 
-var User = mongoose.model('User', userSchema);
+});
 
 // methods ======================
 // generating a hash
@@ -23,19 +22,40 @@ userSchema.methods.generateHash = function(password) {
 
 // checking if password is valid
 userSchema.methods.validPassword = function(password) {
-    return bcrypt.compareSync(password, this.local.password);
+	console.log(userSchema);
+  return bcrypt.compareSync(password, this.local.password);
 };
 
-exports.saveChargeToUser = function(req, done) {
+var User = mongoose.model('User', userSchema);
+
+User.saveChargeToUser = function(req) {
+	User.findById(req.user, function (err, user) {
+		if (err) return console.log(err);
+		console.log(user);
+		var evalId = req.params.id;
+		user.local.charges.push(evalId);
+		user.save(function(err) {
+			if (err) return console.log(err);
+		});
+	});
+};
+
+User.testMe = function() {
+	console.log(userSchema.methods);
+	console.log("I'm here, Ma!");
+}
+
+User.checkPriorCharges = function(req, cb) {
 	User.findById(req.user, function (err, user) {
 		if (err) return console.log(err);
 		var evalId = req.params.id;
-		user.charges.push(evalId);
-		console.log(user.charges);
-		user.save(function(err) {
-			if (err) return console.log(err);
-			done(user);
-		});
+		var hasEval = false;
+		for (i = 0; i < user.local.charges.length; i++) {
+			if (evalId === user.local.charges[i]) {
+				hasEval = true;
+			}
+		};
+		cb(hasEval);
 	});
 };
 

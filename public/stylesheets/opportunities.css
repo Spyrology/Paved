@@ -44,7 +44,12 @@ hr {
 }
 
 .name {
-	width: 38em;
+	width: 12em;
+}
+
+.timeframe {
+	width: 36em;
+	text-align: right;
 }
 
 .opportunities {
@@ -61,18 +66,25 @@ hr {
 .view-details {
 	padding-left: 1.4em;
 	padding-bottom: .5em;
+	font-family: 'Cantarell', sans-serif;
 }
 
 .user-actions {
 	background-color: rgb(72,145,115);
+	width: 9.5em;
+	text-align: center;
 	color: white;
 	border: 0;
 	border-radius: .2em;
+	padding: 0em .4em 0em .4em;
+	font-size: .9em;
 	font-family: 'Cantarell', sans-serif;
 }
 
 #user_upload {
 	display: inline-block;
+	width: 13em;
+	margin-top: .2em;
 }
 
 /* .hidden_upload {

@@ -20,7 +20,10 @@ No HR departments to block your path, no silly job descriptions and requirements
 				<tr> 
 					<td id="wrapper" class="opportunities name">{{position}}
 					</td>
-					<td class="opportunities timeframe">{{status}}</td>
+					<td class="expand"><i class="fa fa-caret-square-o-down"></i>
+					</td>
+					<td class="opportunities timeframe">{{status}}
+					</td>
 				</tr>
 			</tbody>
 		</table>
@@ -28,20 +31,26 @@ No HR departments to block your path, no silly job descriptions and requirements
 		<table>
 			<tbody class="details" id="{{id}}">
 				<tr>
-					<td class="view-details">Absolute minimum requirement: {{requirements}}</td>
+					<td class="view-details">Absolute minimum requirement: {{requirements}}
+					</td>
+					<td>
 				</tr>
 				<tr>
-					<td class="view-details">Estimated time to complete evaluation: {{timeestimate}}</td>
+					<td class="view-details">Estimated time to complete evaluation: {{timeestimate}}
+					</td>
 				</tr>
 				<tr>
-					<td class="view-details">Price: {{price}}</td>
+					<td class="view-details">Price: {{price}}
+					</td>
 				</tr>
 				<tr>
 					<td class="view-details">
-						<button class="user-actions">
-							<a href="/opportunities/{{companyId}}/evaluation/{{id}}">GET EVALUATION
-							</a>
-						</button>
+						<ul class="user-actions">
+							<li>
+								<a href="/opportunities/{{companyId}}/evaluation/{{id}}">GET EVALUATION
+								</a>
+							</li>
+						</ul>
 						<form action="/opportunities/upload" method="post" enctype="multipart/form-data">
 						<button id="user_upload" class="user-actions">UPLOAD EVALUATION
 						</button>

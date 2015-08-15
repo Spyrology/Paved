@@ -11,6 +11,9 @@ var configDB = require('./config/database.js');
 var session = require('express-session');
 var mongoose = require('mongoose');
 var AWS = require('aws-sdk');
+var api_key = 'key-394bb0ed0f344eee80cf5827f753b0ff';
+var domain = 'sandbox4806cb76f7084b8bbd9acc856f53724a.mailgun.org';
+var mailgun = require('mailgun-js')({apiKey: api_key, domain: domain});
 
 AWS.config.update = ({region: 'us-west-2'});
 

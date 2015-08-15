@@ -10,7 +10,8 @@ var AWS = require('aws-sdk');
 var s3 = new AWS.S3();
 var path = require('path');
 var amazon = require('../lib/amazon');
-var users = require('../models/users');
+var stripe = require('../lib/stripe');
+var auth = require('../lib/authentication');
 
 /* GET home page. */
 
@@ -36,80 +37,29 @@ router
 		});
 	})
 	.get('/opportunities/:companyId/evaluation/:id', isLoggedIn, function (req, res) {
-		res.render('payment-form', { stylesheet: 'payment-form' });
+
+		//console.log(user);
+
+		(function checkUserCharges() {
+			user.checkPriorCharges(req, function(hasEval) {
+				if (hasEval === true) {
+					companies.show(req, res);
+				}
+				else {
+					res.render('payment-form', { stylesheet: 'payment-form' });
+				}
+			});
+		}());
+
 	})
 	.post('/opportunities/:companyId/evaluation/:id', function (req, res, next) {
-		//Obtain StripeToken
-		var stripeToken = req.body.stripeToken;
-
-		companies.getOpportunity(req, function (opportunity) {
-
-			var userEmail = req.user.local.email;
-			var evalId = opportunity.id;
-
-			stripe.customers.create({
-			  source: stripeToken,
-			  description: userEmail
-			}).then(function (customer) {
-			  return stripe.charges.create({ 
-			    amount: opportunity.price * 100, // amount in cents
-			    currency: "usd",
-			    customer: customer.id,
-			    metadata: {'evalId': evalId}
-			  }, function (err, charge) {
-				  	if (err && err.type === 'StripeCardError') {
-					    // The card has been declined
-					    return next (err);
-					  }
-					  else {
-					  	users.saveChargeToUser(req);
-					  	console.log(req.user);
-					  	companies.show(req, res);
-					  }
-				});
-			});/*then(function(charge) {
-			  saveStripeCustomerId(user, charge.customer);
-			});*/
-
-			//companies.show(req, res);
-
-			/*var charge = {
-		    amount: opportunity.price * 100,
-		    currency: 'USD',
-		    source: stripeToken,
-		    description: "Example charge"
-	  	};
-
-			stripe.charges.create(charge, function (err, charge) {
-			  if (err && err.type === 'StripeCardError') {
-			    // The card has been declined
-			    return next (err);
-			  }
-			  else {
-			  	companies.show(req, res);
-			  }
-			});
-*/
-		});
+		stripe.createCharge(req, res, next);
 	})
 	.get('/opportunities/:companyId/download/:id', isLoggedIn, function (req, res) {
-		companies.getOpportunity(req, function(opportunity) {
-			var filename = opportunity.file;
-			var params = {Bucket: 'paved-test', Key: filename};
-			var file = fs.createWriteStream(path.join(__dirname, filename));
-				s3.getObject(params)
-				.on('httpData', function(chunk) { file.write(chunk); })
-				.on('httpDone', function(data) {
-					file.end(function (err, result) {
-						res.attachment(file.path);
-						fs.createReadStream(file.path).pipe(res);
-							fs.unlinkSync(file.path);
-					});
-				})
-				.send();
-		});
+		amazon.downloadEvaluation(req, res);
 	})
-	.post('/opportunities/upload', function (req, res) {
+	.post('/opportunities/upload', isLoggedIn, function (req, res) {
+		res.redirect('/opportunities');
 		amazon.upload(req, function (err, data) {
 			if (err) return console.error(err);
 			res.redirect('/opportunities');
@@ -131,70 +81,14 @@ router
 	})
 	// process the signup form
   .post('/sign-up', function (req, res, next) {
-	  passport.authenticate('local-signup', function(err, user, info) {
-	    //This is the default destination upon successful login
-	    var redirectUrl = '/';
-
-	    if (err) { return next(err); }
-	    if (!user) { return res.redirect('/'); }
-
-	    //If we have previously stored a redirectUrl, use that,
-	    // otherwise, use the default
-	    if (req.session.redirectUrl) {
-	    	redirectUrl = req.session.redirectUrl;
-	    	req.session.redirectUrl = null;
-	    }
-
-	    req.logIn(user, function(err){
-	    	if (err) { return next(err); }
-	    });
-	    res.redirect(redirectUrl);
-		})(req, res, next);
+	  auth.authRedirectSignUp(req, res, next);
   })
   .get('/log-in', function (req, res) {
 		res.render('log-in', {layout: false});
 	})
   .post('/log-in', function (req, res, next) {
-	  passport.authenticate('local-login', function(err, user, info) {
-	    //This is the default destination upon successful login
-	    var redirectUrl = '/';
-
-	    if (err) { return next(err); }
-	    if (!user) { return res.redirect('/'); }
-
-	    //If we have previously stored a redirectUrl, use that,
-	    // otherwise, use the default
-	    if (req.session.redirectUrl) {
-	    	redirectUrl = req.session.redirectUrl;
-	    	req.session.redirectUrl = null;
-	    }
-
-	    req.logIn(user, function (err) {
-	    	if (err) { return next(err); }
-	    });
-	    res.redirect(redirectUrl);
-		})(req, res, next);
+	  auth.authRedirectLogIn(req, res, next);
   });
-
-var custRedir = function (err, user, info) {
-	//This is the default destination upon successful login
-  var redirectUrl = '/';
-
-  if (err) { return next(err); }
-  if (!user) { return res.redirect('/'); }
-
-  //If we have previously stored a redirectUrl, use that,
-  // otherwise, use the default
-  if (req.session.redirectUrl) {
-  	redirectUrl = req.session.redirectUrl;
-  	req.session.redirectUrl = null;
-  }
-
-  req.logIn(user, function(err){
-  	if (err) { return next(err); }
-  });
-  res.redirect(redirectUrl);
-};
 
 // route middleware to make sure a user is logged in
 function isLoggedIn(req, res, next) {
@@ -205,7 +99,7 @@ function isLoggedIn(req, res, next) {
 
     req.session.redirectUrl = req.url;
 
-    // if they aren't redirect them to the home page
+    // if they aren't redirect them to log in
     res.redirect('/log-in');
 }
 
