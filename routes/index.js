@@ -62,7 +62,6 @@ router
 		res.redirect('/opportunities');
 		amazon.upload(req, function (err, data) {
 			if (err) return console.error(err);
-			res.redirect('/opportunities');
 		});
 	})
 	.get('/admin', isLoggedIn, function (req, res) {
