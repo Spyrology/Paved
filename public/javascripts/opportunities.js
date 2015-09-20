@@ -5,16 +5,12 @@ $(document).ready(function() {
 		$(this).closest('.wrapper').children('.details-container').slideToggle({duration: 400});
 	});
 
-	/*$('.wrapper').click(function() {
-		$(this).children('.details-container').slideToggle({duration: 400});*/
-		/*$('html, body').animate({
-      scrollTop: $('.details-container').offset().top + $('window').height()
-    }, 800);*/
-	/*});*/
+	/*$(".upload").click(function() {
+    $("#file").click();
+	});
 
-	$("#user_upload").click = function() {
-		console.log("works");
-    document.getElementById('hide_upload').click();
-	};
-
+	$('#file').change(function() {
+    $('#submit_upload').submit();
+	});
+*/
 });
