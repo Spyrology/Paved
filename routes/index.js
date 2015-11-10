@@ -34,7 +34,8 @@ router
 					list[i].companyId = company._id;
 				});
 			});
-			res.render('opportunities', {stylesheet: 'opportunities', companies: opps});
+			res.send(opps);
+			//res.render('opportunities', {stylesheet: 'opportunities', companies: opps});
 		});
 	})
 	.get('/opportunities/:companyId/evaluation/:id', isLoggedIn, function (req, res) {
