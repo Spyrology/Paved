@@ -1,4 +1,5 @@
 var express = require('express');
+var cors = require('cors');
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
@@ -25,6 +26,7 @@ require('./config/passport')(passport);
 var routes = require('./routes/index');
 
 var app = express();
+app.use(cors({origin: true, credentials: true}));
 
 // view engine setup
 var expressHbs = require('express-handlebars');

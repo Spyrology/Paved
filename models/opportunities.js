@@ -55,7 +55,6 @@ var buildOpportunity = function(req) {
 };
 
 exports.create = function(req, res) {
-  console.log('create');
 	amazon.upload(req, function (err, data) {
 		var company = new Company({
 			name: req.body.name,
@@ -71,13 +70,11 @@ exports.create = function(req, res) {
 };
 
 exports.update = function(req, res) {
-  console.log('update');
 	amazon.upload(req, function (err, data) {
 		if (err) return console.error(err);
 		Company.findById(req.body.company, function (err, company) {
 			if (err) return console.log(err);
 			company.opportunities.push(buildOpportunity(req));
-			console.log(buildOpportunity(req));
 			company.save(function (err) {
 				if (err) return console.log(err);
         res.render('opportunities', {
@@ -102,7 +99,6 @@ exports.show = function(req, res) {
 	Company.findById(req.params.companyId, function (err, company) {
 		if (err) throw err;
 		var evaluation = company.opportunities.id(req.params.id);
-		console.log(evaluation);
 		res.render('evaluation', {
 			stylesheet: 'evaluation',
 			company: company,
