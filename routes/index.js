@@ -17,12 +17,12 @@ var auth = require('../lib/authentication');
 /* GET home page. */
 
 router
-	
+
 	/*.get('/', function(req, res) {
   	res.render('landing-page.hbs', { layout: false });
 	})*/
 	/*.post('/', emails.create)*/
-	
+
 	.get('/', function (req, res) {
 		res.render('index', { stylesheet: 'index' });
 	})
@@ -69,15 +69,23 @@ router
 	.post('/opportunities/:companyId/evaluation/:id', function (req, res, next) {
 		stripe.createCharge(req, res, next);
 	})
-	.get('/opportunities/:companyId/download/:id', isLoggedIn, function (req, res) {
-		user.checkPriorCharges(req, function(hasEval) {
-			if (hasEval === true) { 
-				amazon.downloadEvaluation(req, res);
-			}
-			else {
-				res.send("Not authorized");
-			}
-		});
+	.get('/opportunities/:companyId/download/:id', isLoggedIn, function (req, res, next) {
+        req.user.hasPurchasedEval(req.params.id, function(err, hasEval) {
+            if (err) return next(err);
+
+            if (hasEval === true) {
+                var companyId = req.params.companyId;
+                var evalId = req.params.id;
+                companies.getOpportunity(companyId, evalId, function(err, opportunity) {
+                    if (err) return next(err);
+
+                    var url = amazon.getDownloadUrl(opportunity.file);
+                    res.redirect(url);
+                });
+            } else {
+                res.send("Not authorized");
+            }
+        });
 	})
 	/*.post('/opportunities/upload', isLoggedIn, function (req, res) {
 		res.redirect('/opportunities');
