@@ -8,7 +8,7 @@ var userSchema = mongoose.Schema({
 	profile				: {
 		firstname		: String,
 		lastname		: String,
-  	charges			: [] 
+  	charges			: []
 	},
 	localAuth			: {
 		email   		: String,
@@ -40,6 +40,7 @@ User.saveChargeToUser = function(req) {
 	});
 };
 
+// this would go away after a full refactor
 User.checkPriorCharges = function(req, cb) {
 	User.findById(req.user, function (err, user) {
 		if (err) return console.log(err);
@@ -52,6 +53,16 @@ User.checkPriorCharges = function(req, cb) {
 		};
 		cb(hasEval);
 	});
+};
+
+userSchema.methods.hasPurchasedEval = function(evalId, cb) {
+    var charges = this.profile.charges || [];
+    for (var i = 0; i < charges.length; i++) {
+        if (evalId === charges[i]) {
+            return cb(null, true);
+        }
+    }
+    return cb(null, false);
 };
 
 module.exports = mongoose.model('User', userSchema);

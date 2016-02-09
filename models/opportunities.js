@@ -107,6 +107,7 @@ exports.show = function(req, res) {
 	});
 };
 
+// this would go away after a full refactor
 exports.getOpportunity = function(req, done) {
 	var companyId = req.params.companyId;
 	var evalId = req.params.id;
@@ -115,4 +116,13 @@ exports.getOpportunity = function(req, done) {
 		var opportunity = company.opportunities.id(evalId);
 		done(opportunity);
 	});
+};
+
+exports.getOpportunity = function(companyId, evalId, done) {
+    Company.findById(companyId, function (err, company) {
+        if (err) return done(err);
+
+        var opportunity = company.opportunities.id(evalId);
+        done(null, opportunity);
+    });
 };
