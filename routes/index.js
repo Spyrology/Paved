@@ -104,8 +104,8 @@ router
   })
 
   /////////////////BELOW ARE REACT END-POINTS//////////////////////////////
-  .post('/auth', function(req, res) {
-  	auth.reactAuth(req, res);
+  .post('/login', function(req, res) {
+  	auth.reactLogIn(req, res);
   })
   .post('/signup', function(req, res) {
   	auth.reactSignUp(req, res);

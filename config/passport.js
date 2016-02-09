@@ -49,17 +49,24 @@ module.exports = function(passport) {
         // we are checking to see if the user trying to login already exists
         User.findOne({ 'localAuth.email' :  email }, function(err, user) {
             // if there are any errors, return the error
-            if (err)
+            if (err) {
+                console.log("made it X");
                 return done(err);
+              }
 
             // check to see if theres already a user with that email
             if (user) {
-                return done(null, false, req.flash('signupMessage', 'That email is already taken.'));
+                return done(new Error('That email is already taken.'), false, req.flash('signupMessage', 'That email is already taken.'));
             }  
             else {
 
                 if (req.body.password !== req.body.confirmpassword) {
-                  return done(null, false, req.flash('signupMessage', 'Password does not match'));
+                  return done(new Error('Password does not match'), false, req.flash('signupMessage', 'Password does not match'));
+                }
+
+                if (req.body.firstname.trim() === '' || req.body.lastname.trim() === '' ||
+                    req.body.email.trim() === '' || req.body.password.trim() === '') {
+                  return done(new Error('Required field missing.'));
                 }
 
                 // if there is no user with that email
@@ -74,8 +81,11 @@ module.exports = function(passport) {
 
                 // save the user
                 newUser.save(function(err) {
-                    if (err)
+                    if (err) {
+                      console.log("made it #1");
                       return done(err);
+                    }
+                    console.log("made it #2");
                     return done(null, newUser);
                 });
             }
