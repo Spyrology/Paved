@@ -49,42 +49,29 @@ router
 				});
 			});
 			res.send(opps);
-			/*res.render('opportunities', {stylesheet: 'opportunities', companies: opps});*/
 		});
 	})
-	/*.get('/opportunities/:companyId/evaluation/:id', isLoggedIn, function (req, res) {
-
-		(function checkUserCharges() {
-			user.checkPriorCharges(req, function(hasEval) {
-				if (hasEval === true) {
-					companies.show(req, res);
-				}
-				else {
-					res.render('payment-form', { stylesheet: 'payment-form' });
-				}
-			});
-		}());
-
-	})*/
 	.post('/opportunities/:companyId/evaluation/:id', function (req, res, next) {
 		stripe.createCharge(req, res, next);
 	})
-	.get('/opportunities/:companyId/download/:id', isLoggedIn, function (req, res) {
-		user.checkPriorCharges(req, function(hasEval) {
-			if (hasEval === true) { 
-				amazon.downloadEvaluation(req, res);
-			}
-			else {
-				res.send("Not authorized");
-			}
+	.get('/opportunities/:companyId/download/:id', isLoggedIn, function (req, res, next) {
+			req.user.hasPurchasedEval(req.params.id, function(err, hasEval) {
+				if (err) return next(err);
+			
+				if (hasEval === true) { 
+					var companyId = req.params.companyId;
+					var evalId = req.params.id;
+					companies.getOpportunity(companyId, evalId, function(err, opportunity) {
+							if (err) return next(err);
+
+							var url = amazon.getDownloadUrl(opportunity.file);
+							res.redirect(url);
+					});
+				} else {
+					res.send("Not authorized");
+				}		
 		});
 	})
-	/*.post('/opportunities/upload', isLoggedIn, function (req, res) {
-		res.redirect('/opportunities');
-		amazon.upload(req, function (err, data) {
-			if (err) return console.error(err);
-		});
-	})*/
 	.get('/admin', isLoggedIn, function (req, res) {
 		companies.find(req, function (err, opps) {
 			if(err) return console.log(err);
@@ -110,17 +97,20 @@ router
   .post('/signup', function(req, res) {
   	auth.reactSignUp(req, res);
   })
-  .get('/opportunities/:companyId/evaluation/:id', function(req, res, next) {
-		user.checkPriorCharges(req, function(hasEval) {
+  .get('/opportunities/:companyId/evaluation/:id', isLoggedIn, function(req, res, next) {
+		req.user.hasPurchasedEval(req.params.id, function(err, hasEval) {
 			if (hasEval === false) {
 				return res.json({hasPurchased: false, evalDetails: null})
 			}
 			else {
-				companies.getOpportunity(req, function(opp) {
+				var companyId = req.params.companyId;
+				var evalId = req.params.id;
+				companies.getOpportunity(companyId, evalId, function(err, opportunity) {
+					if (err) return next(err);
 					return res.json({hasPurchased: true,
 						evalDetails: {
-							description: opp.description,
-							file: opp.file
+							description: opportunity.description,
+							file: opportunity.file
 						}
 					})
 				})
@@ -128,7 +118,7 @@ router
 		})
   })
   .post('/opportunities/:companyId/upload/:id', isLoggedIn, function (req, res, next) {
-  	user.checkPriorCharges(req, function(hasEval) {
+  	req.user.hasPurchasedEval(req.params.id, function(err, hasEval) {
   		if (hasEval === true) {
 				amazon.upload(req, function (err, data) {
 					if (err) return next(err);
@@ -160,8 +150,8 @@ function isLoggedIn(req, res, next) {
 
     req.session.redirectUrl = req.url;
 
-    // if they aren't redirect them to log in
-    res.redirect('/log-in');
+    // if user is not authenticated, send 401 response
+    res.send(401, 'Unauthorized');
 }
 
 var requiresAdmin = function() {

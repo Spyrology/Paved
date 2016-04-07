@@ -107,12 +107,21 @@ exports.show = function(req, res) {
 	});
 };
 
-exports.getOpportunity = function(req, done) {
+exports.getOpportunityA = function(req, done) {
 	var companyId = req.params.companyId;
 	var evalId = req.params.id;
 	Company.findById(companyId, function (err, company) {
 		if (err) throw err;
 		var opportunity = company.opportunities.id(evalId);
 		done(opportunity);
+	});
+};
+
+exports.getOpportunity = function(companyId, evalId, done) {
+	Company.findById(companyId, function (err, company) {
+		if (err) return (err);
+
+		var opportunity = company.opportunities.id(evalId);
+		done(null, opportunity);
 	});
 };
